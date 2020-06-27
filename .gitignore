@@ -9,4 +9,3 @@ chromedriver
 .DS_Store
 
 logs/
-notebooks/
