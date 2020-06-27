@@ -257,7 +257,7 @@ def scrape_tag(tag, yearstart, monthstart, yearstop, monthstop):
     #1. MAKE SURE TAG IS VALID (no idea how to do this without exhaustive list... too much work )
     #2.CHECK VALID FILE PATH
     path = os.getcwd()
-    path = path + "/TAG_SCRAPES/medium_"+tag+".csv"
+    path = path + "/medium_"+tag+".csv"
     #3. TRY TO OPEN FILE PATH
     try:
         file = open(path, "w")
@@ -297,58 +297,63 @@ def scrape_tag(tag, yearstart, monthstart, yearstop, monthstop):
 
         response = chrome_driver.get(url)
 
-
-        soup = BeautifulSoup(chrome_driver.page_source, features='lxml')
-
-        #FIND ALL STORY CARDS, EACH IS AN ARTICLE
-        cards = find_post_cards(soup)
-
-        #PULL DATA FROM CARDS
-        titles = get_titles_from_cards(cards)
-        subtitles = get_subtitles_from_cards(cards)
-        images = get_image_from_cards(cards)
-        authors, pubs = get_auth_and_pubs_from_cards(cards)
-        year, month, day, tags = get_dates_and_tags(tag,
-                                        current_date.year,
-                                        current_date.month,
-                                        current_date.day,
-                                        cards)
-        readingTimes = get_readTime_from_cards(cards)
-        applause = get_applause_from_cards(cards)
-        urls = get_urls_from_cards(cards)
-        auth_urls = get_auth_urls_from_cards(cards)
-        comment = get_comment_from_cards(cards)
-
-        #ACCUMULATE DATA INTO A DICTIONARY
-        dict = {"Title":titles,"Subtitle":subtitles,"Image":images,"Author":authors, "Publication":pubs, "Year":year, "Month":month, "Day":day, "Tag":tags, "Reading_Time":readingTimes, "Claps":applause,"Comment":comment, "url":urls, "Author_url":auth_urls}
-
-        #CHECK THAT DATA IN EACH CATEGORY IS THE SAME LENGTH
-        vals = list(dict.values())
-        for col in vals:
-            if len(col)==len(cards):
-                continue
-            else:
-                raise Exception("Data length does not match number of stories on page.")
-
-        #CREATE DATAFRAME TO ORGANIZE AND SAVE TO CSV
-        df = pd.DataFrame.from_dict(dict)
-
-        #APPEND DATA TO FILE,
-        # IF FIRSTPAGE-> ADD A HEADER
-        if firstPage:
-            with open(path, 'a') as f:
-                df.to_csv(f, mode="a", header=True, index = False)
-            firstPage=False
-        #IF NOT FIRSTPAGE -> NO HEADER
+        # Avoid empty dates
+        if chrome_driver.current_url != url:
+            current_date = current_date + timedelta(days=1)
+            time.sleep(2)
         else:
-            with open(path, 'a') as f:
-                df.to_csv(f, mode="a", header=False, index=False)
+            soup = BeautifulSoup(chrome_driver.page_source, features='lxml')
 
-        #ADDS A DAY TO THE CURRENT DATE FOR NEXT URL CALL
-        current_date = current_date + timedelta(days=1)
+            #FIND ALL STORY CARDS, EACH IS AN ARTICLE
+            cards = find_post_cards(soup)
 
-        #PRINTS THE NUMBER OF TOTAL TIMELINE CARDS SAVED TO CSV
-        counter = counter + len(cards)
-        print(counter, "    ",current_date)
-        time.sleep(2)
+            #PULL DATA FROM CARDS
+            titles = get_titles_from_cards(cards)
+            subtitles = get_subtitles_from_cards(cards)
+            images = get_image_from_cards(cards)
+            authors, pubs = get_auth_and_pubs_from_cards(cards)
+            year, month, day, tags = get_dates_and_tags(tag,
+                                            current_date.year,
+                                            current_date.month,
+                                            current_date.day,
+                                            cards)
+            readingTimes = get_readTime_from_cards(cards)
+            applause = get_applause_from_cards(cards)
+            urls = get_urls_from_cards(cards)
+            auth_urls = get_auth_urls_from_cards(cards)
+            comment = get_comment_from_cards(cards)
+
+            #ACCUMULATE DATA INTO A DICTIONARY
+            dict = {"Title":titles,"Subtitle":subtitles,"Image":images,"Author":authors, "Publication":pubs, "Year":year, "Month":month, "Day":day, "Tag":tags, "Reading_Time":readingTimes, "Claps":applause,"Comment":comment, "url":urls, "Author_url":auth_urls}
+
+            #CHECK THAT DATA IN EACH CATEGORY IS THE SAME LENGTH
+            vals = list(dict.values())
+            for col in vals:
+                if len(col)==len(cards):
+                    continue
+                else:
+                    raise Exception("Data length does not match number of stories on page.")
+
+            #CREATE DATAFRAME TO ORGANIZE AND SAVE TO CSV
+            df = pd.DataFrame.from_dict(dict)
+
+            #APPEND DATA TO FILE,
+            # IF FIRSTPAGE-> ADD A HEADER
+            if firstPage:
+                with open(path, 'a') as f:
+                    df.to_csv(f, mode="a", header=True, index = False)
+                firstPage=False
+            #IF NOT FIRSTPAGE -> NO HEADER
+            else:
+                with open(path, 'a') as f:
+                    df.to_csv(f, mode="a", header=False, index=False)
+
+            #PRINTS THE NUMBER OF TOTAL TIMELINE CARDS SAVED TO CSV
+            counter = counter + len(cards)
+            print(counter, "    ",current_date)
+
+            #ADDS A DAY TO THE CURRENT DATE FOR NEXT URL CALL
+            current_date = current_date + timedelta(days=1)
+            time.sleep(2)
+
     chrome_driver.close()
