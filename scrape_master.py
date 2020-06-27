@@ -12,10 +12,10 @@ tags = ["data-science"]
 
 
 #ADD THE DATES TO SCRAPE HERE
-yearstart=2017
-monthstart=10
-yearstop=2018
-monthstop=10
+yearstart=2020
+monthstart=3
+yearstop=2020
+monthstop=4
 
 #LOOPS THROUGH ALL LISTED-TAGS AND SCRAPES DATA OFF OF MEDIUM/TAG/archive
 #SAVES THE FILES TO /TAG_SCRAPES/ IN CSV FORMAT
