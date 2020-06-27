@@ -1,0 +1,12 @@
+.venv
+.vscode
+.jupyter
+.ipynb_checkpoints
+__pycache__
+
+chromedriver
+
+.DS_Store
+
+logs/
+notebooks/
