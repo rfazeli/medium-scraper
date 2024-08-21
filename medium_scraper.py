@@ -2,12 +2,17 @@ import os
 from datetime import datetime, timedelta
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import re
 import pandas as pd
 import time
 
-
+# Set up Chrome options
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
 
 def base_url_builder(tag):
     #BUILDS THE BASE URL TO ITERATE ON FROM GIVEN TAG
@@ -35,7 +40,7 @@ def get_end_date(year, month, day):
 
 def open_chrome():
     #OPENS A CHROME DRIVER
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(30)
     return driver
 
